@@ -44,22 +44,22 @@ export default async function Page({
     <main className="min-h-screen bg-[#1b1e32] text-[#bad2ed]">
       <div className="mx-auto max-w-2xl px-6 py-12">
         <div className="mb-8">
-          <p className="text-sm uppercase tracking-[0.22em] text-white/60">
+          <p className="text-sm uppercase tracking-[0.22em] text-[#bad2ed]/70">
             VIP registrace
           </p>
 
           <h1 className="mt-2 text-3xl font-semibold leading-tight">
             {match.home}
-            <span className="block text-white">vs.</span>
+            <span className="block text-[#bad2ed]">vs.</span>
             {match.away}
           </h1>
 
-          <p className="mt-4 text-white/80">{matchDate}</p>
-          <p className="mt-1 text-white/70">{match.venue}</p>
+          <p className="mt-4 text-[#bad2ed]/90">{matchDate}</p>
+          <p className="mt-1 text-[#bad2ed]/80">{match.venue}</p>
         </div>
 
         <div className="mb-6 rounded-2xl border border-[#bad2ed]/40 bg-[#bad2ed]/10 p-4 text-sm">
-          <p className="font-semibold text-white">
+          <p className="font-semibold text-[#bad2ed]">
             Vstup do VIP prostor bude umožněn 1 hodinu před začátkem zápasu.
           </p>
         </div>
@@ -71,29 +71,29 @@ export default async function Page({
           <input type="hidden" name="match_id" value={match.id} />
 
           <div>
-            <label className="mb-2 block text-sm text-white/80">
+            <label className="mb-2 block text-sm text-[#bad2ed]/80">
               Jméno a příjmení
             </label>
             <input
               name="name"
               type="text"
               required
-              className="w-full rounded-2xl border border-white/15 bg-black/10 px-4 py-3 text-white outline-none"
+              className="w-full rounded-2xl border border-white/15 bg-black/10 px-4 py-3 text-[#bad2ed] outline-none"
             />
           </div>
 
           <div>
-            <label className="mb-2 block text-sm text-white/80">E-mail</label>
+            <label className="mb-2 block text-sm text-[#bad2ed]/80">E-mail</label>
             <input
               name="email"
               type="email"
               required
-              className="w-full rounded-2xl border border-white/15 bg-black/10 px-4 py-3 text-white outline-none"
+              className="w-full rounded-2xl border border-white/15 bg-black/10 px-4 py-3 text-[#bad2ed] outline-none"
             />
           </div>
 
           <div>
-            <label className="mb-2 block text-sm text-white/80">
+            <label className="mb-2 block text-sm text-[#bad2ed]/80">
               Počet vstupenek
             </label>
             <input
@@ -103,16 +103,16 @@ export default async function Page({
               max="10"
               defaultValue="1"
               required
-              className="w-full rounded-2xl border border-white/15 bg-black/10 px-4 py-3 text-white outline-none"
+              className="w-full rounded-2xl border border-white/15 bg-black/10 px-4 py-3 text-[#bad2ed] outline-none"
             />
           </div>
 
           <div>
-            <label className="mb-2 block text-sm text-white/80">Poznámka</label>
+            <label className="mb-2 block text-sm text-[#bad2ed]/80">Poznámka</label>
             <textarea
               name="note"
               rows={4}
-              className="w-full rounded-2xl border border-white/15 bg-black/10 px-4 py-3 text-white outline-none"
+              className="w-full rounded-2xl border border-white/15 bg-black/10 px-4 py-3 text-[#bad2ed] outline-none"
             />
           </div>
 

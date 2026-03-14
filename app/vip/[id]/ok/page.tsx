@@ -2,17 +2,16 @@ export default function VipRegistrationOkPage() {
   return (
     <main className="min-h-screen bg-[#1b1e32] text-[#bad2ed]">
       <div className="mx-auto max-w-xl px-6 py-16 text-center">
-        <h1 className="text-3xl font-semibold text-white">
+        <h1 className="text-3xl font-semibold text-[#bad2ed]">
           Děkujeme za registraci
         </h1>
 
-        <p className="mt-6 text-white/80 leading-relaxed">
+        <p className="mt-6 leading-relaxed text-[#bad2ed]/90">
           Vaše VIP registrace byla úspěšně přijata.
         </p>
 
-        <p className="mt-4 text-white/80 leading-relaxed">
-          VIP vstupenky vám budou zaslány na uvedený e-mail
-          <span className="font-semibold text-white"> v den zápasu.</span>
+        <p className="mt-4 leading-relaxed text-[#bad2ed]">
+          VIP vstupenky vám budou zaslány na uvedený e-mail v den zápasu.
         </p>
 
         <a
