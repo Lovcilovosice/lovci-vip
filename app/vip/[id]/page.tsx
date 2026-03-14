@@ -4,10 +4,13 @@ import { saveVipRegistration } from './actions'
 
 export default async function Page({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ error?: string }>
 }) {
   const { id } = await params
+  const resolvedSearchParams = await searchParams
   const matchId = Number(id)
 
   if (!matchId || Number.isNaN(matchId)) {
@@ -40,6 +43,20 @@ export default async function Page({
     minute: '2-digit',
   })
 
+  let errorMessage = ''
+
+  if (resolvedSearchParams.error === 'email_not_invited') {
+    errorMessage = 'Zadaný e-mail není mezi pozvanými hosty.'
+  } else if (resolvedSearchParams.error === 'missing_fields') {
+    errorMessage = 'Prosím vyplňte všechna povinná pole.'
+  } else if (resolvedSearchParams.error === 'save_failed') {
+    errorMessage = 'Registraci se nepodařilo uložit. Zkuste to prosím znovu.'
+  } else if (resolvedSearchParams.error === 'email_check_failed') {
+    errorMessage = 'Nepodařilo se ověřit e-mail. Zkuste to prosím znovu.'
+  } else if (resolvedSearchParams.error === 'already_registered') {
+    errorMessage = 'Na tento zápas jste již registrován.'
+  }
+
   return (
     <main className="min-h-screen bg-[#1b1e32] text-[#bad2ed]">
       <div className="mx-auto max-w-2xl px-6 py-12">
@@ -63,6 +80,12 @@ export default async function Page({
             Vstup do VIP prostor bude umožněn 1 hodinu před začátkem zápasu.
           </p>
         </div>
+
+        {errorMessage ? (
+          <div className="mb-6 rounded-2xl border border-red-400/40 bg-red-500/10 p-4 text-sm">
+            <p className="font-semibold text-red-300">{errorMessage}</p>
+          </div>
+        ) : null}
 
         <form
           action={saveVipRegistration}

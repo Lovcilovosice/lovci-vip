@@ -1,35 +1,55 @@
 'use server'
 
-import { supabase } from '@/lib/supabase'
 import { redirect } from 'next/navigation'
+import { supabase } from '../../../lib/supabase'
 
 export async function saveVipRegistration(formData) {
   const matchId = Number(formData.get('match_id'))
-  const name = String(formData.get('name') || '').trim()
-  const email = String(formData.get('email') || '').trim()
-  const ticketsCount = Number(formData.get('tickets_count') || 1)
-  const note = String(formData.get('note') || '').trim()
+  const name = formData.get('name')?.toString().trim() || ''
+  const email = formData.get('email')?.toString().trim().toLowerCase() || ''
+  const ticketsCount = Number(formData.get('tickets_count'))
+  const note = formData.get('note')?.toString().trim() || ''
 
-  if (!matchId || !name || !email) {
-    throw new Error('Chybí povinné údaje.')
+  if (!matchId || Number.isNaN(matchId)) {
+    redirect('/vip')
   }
 
-  if (ticketsCount < 1 || ticketsCount > 10) {
-    throw new Error('Počet vstupenek musí být mezi 1 a 10.')
+  if (!name || !email || !ticketsCount) {
+    redirect(`/vip/${matchId}?error=missing_fields`)
   }
 
-  const { error } = await supabase.from('registrations').insert([
-    {
-      match_id: matchId,
-      name,
-      email,
-      tickets_count: ticketsCount,
-      note: note || null,
-    },
-  ])
+  const { data: invitedEmail, error: invitedEmailError } = await supabase
+    .from('vip_invited_emails')
+    .select('id, email')
+    .eq('email', email)
+    .maybeSingle()
 
-  if (error) {
-    throw new Error(error.message)
+  if (invitedEmailError) {
+    redirect(`/vip/${matchId}?error=email_check_failed`)
+  }
+
+  if (!invitedEmail) {
+    redirect(`/vip/${matchId}?error=email_not_invited`)
+  }
+
+  const { error: insertError } = await supabase
+    .from('registrations')
+    .insert([
+      {
+        match_id: matchId,
+        name,
+        email,
+        tickets_count: ticketsCount,
+        note,
+      },
+    ])
+
+  if (insertError) {
+    if (insertError.code === '23505') {
+      redirect(`/vip/${matchId}?error=already_registered`)
+    }
+
+    redirect(`/vip/${matchId}?error=save_failed`)
   }
 
   redirect(`/vip/${matchId}/ok`)
