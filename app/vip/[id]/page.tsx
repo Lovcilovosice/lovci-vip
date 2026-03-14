@@ -25,7 +25,7 @@ export default async function Page({
 
   if (error) {
     return (
-      <main className="min-h-screen bg-[#1b1e32] px-6 py-12 text-red-300">
+      <main className="min-h-screen bg-[#1b1e32] px-4 py-8 text-red-300 sm:px-6 sm:py-12">
         Chyba databáze: {error.message}
       </main>
     )
@@ -59,13 +59,13 @@ export default async function Page({
 
   return (
     <main className="min-h-screen bg-[#1b1e32] text-[#bad2ed]">
-      <div className="mx-auto max-w-2xl px-6 py-12">
+      <div className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6 sm:py-12">
         <div className="mb-8">
           <p className="text-sm uppercase tracking-[0.22em] text-[#bad2ed]/70">
             VIP registrace
           </p>
 
-          <h1 className="mt-2 text-3xl font-semibold leading-tight">
+          <h1 className="mt-2 text-2xl font-semibold leading-tight sm:text-3xl">
             {match.home}
             <span className="block text-[#bad2ed]">vs.</span>
             {match.away}
@@ -89,7 +89,7 @@ export default async function Page({
 
         <form
           action={saveVipRegistration}
-          className="space-y-6 rounded-3xl border border-[#bad2ed]/25 bg-white/[0.03] p-6"
+          className="space-y-5 rounded-3xl border border-[#bad2ed]/25 bg-white/[0.03] p-4 sm:p-6"
         >
           <input type="hidden" name="match_id" value={match.id} />
 
@@ -101,7 +101,7 @@ export default async function Page({
               name="name"
               type="text"
               required
-              className="w-full rounded-2xl border border-white/15 bg-black/10 px-4 py-3 text-[#bad2ed] outline-none"
+              className="w-full rounded-2xl border border-white/15 bg-black/10 px-4 py-3 text-base text-[#bad2ed] outline-none focus:border-[#bad2ed]"
             />
           </div>
 
@@ -111,7 +111,7 @@ export default async function Page({
               name="email"
               type="email"
               required
-              className="w-full rounded-2xl border border-white/15 bg-black/10 px-4 py-3 text-[#bad2ed] outline-none"
+              className="w-full rounded-2xl border border-white/15 bg-black/10 px-4 py-3 text-base text-[#bad2ed] outline-none focus:border-[#bad2ed]"
             />
           </div>
 
@@ -126,7 +126,7 @@ export default async function Page({
               max="10"
               defaultValue="1"
               required
-              className="w-full rounded-2xl border border-white/15 bg-black/10 px-4 py-3 text-[#bad2ed] outline-none"
+              className="w-full rounded-2xl border border-white/15 bg-black/10 px-4 py-3 text-base text-[#bad2ed] outline-none focus:border-[#bad2ed]"
             />
           </div>
 
@@ -135,13 +135,13 @@ export default async function Page({
             <textarea
               name="note"
               rows={4}
-              className="w-full rounded-2xl border border-white/15 bg-black/10 px-4 py-3 text-[#bad2ed] outline-none"
+              className="w-full rounded-2xl border border-white/15 bg-black/10 px-4 py-3 text-base text-[#bad2ed] outline-none focus:border-[#bad2ed]"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full rounded-2xl border border-[#bad2ed] bg-[#bad2ed] px-4 py-3 text-sm font-semibold text-[#1b1e32] hover:opacity-90"
+            className="w-full rounded-2xl border border-[#bad2ed] bg-[#bad2ed] px-4 py-3.5 text-base font-semibold text-[#1b1e32] hover:opacity-90"
           >
             Odeslat registraci
           </button>

@@ -6,7 +6,8 @@ import { supabase } from '../../../lib/supabase'
 export async function saveVipRegistration(formData) {
   const matchId = Number(formData.get('match_id'))
   const name = formData.get('name')?.toString().trim() || ''
-  const email = formData.get('email')?.toString().trim().toLowerCase() || ''
+  const email =
+    formData.get('email')?.toString().trim().toLowerCase().replace(/\s+/g, '') || ''
   const ticketsCount = Number(formData.get('tickets_count'))
   const note = formData.get('note')?.toString().trim() || ''
 
