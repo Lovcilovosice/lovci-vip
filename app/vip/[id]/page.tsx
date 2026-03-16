@@ -54,7 +54,7 @@ export default async function Page({
   } else if (resolvedSearchParams.error === 'email_check_failed') {
     errorMessage = 'Nepodařilo se ověřit e-mail. Zkuste to prosím znovu.'
   } else if (resolvedSearchParams.error === 'already_registered') {
-    errorMessage = 'Na tento zápas jste již registrován.'
+    errorMessage = 'Na tento zápas jste již registrován. V případě nejasností kontaktujte lucie@hazenalovosice.cz'
   }
 
   return (
