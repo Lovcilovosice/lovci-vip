@@ -46,7 +46,7 @@ export default async function Page({
   let errorMessage = ''
 
   if (resolvedSearchParams.error === 'email_not_invited') {
-    errorMessage = 'Zadaný e-mail není mezi pozvanými hosty.'
+    errorMessage = 'Zadaný e-mail není mezi pozvanými hosty. V případě nejasností se obracejte na lucie@hazenalovosice.cz.'
   } else if (resolvedSearchParams.error === 'missing_fields') {
     errorMessage = 'Prosím vyplňte všechna povinná pole.'
   } else if (resolvedSearchParams.error === 'save_failed') {

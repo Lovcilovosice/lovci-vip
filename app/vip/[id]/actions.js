@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation'
 import { supabase } from '../../../lib/supabase'
+import { sendMail } from '@/lib/mail'
 
 export async function saveVipRegistration(formData) {
   const matchId = Number(formData.get('match_id'))
@@ -33,6 +34,16 @@ export async function saveVipRegistration(formData) {
     redirect(`/vip/${matchId}?error=email_not_invited`)
   }
 
+  const { data: match, error: matchError } = await supabase
+    .from('matches')
+    .select('id, home, away, match_date')
+    .eq('id', matchId)
+    .single()
+
+  if (matchError || !match) {
+    redirect(`/vip/${matchId}?error=match_not_found`)
+  }
+
   const { error: insertError } = await supabase
     .from('registrations')
     .insert([
@@ -52,6 +63,31 @@ export async function saveVipRegistration(formData) {
 
     redirect(`/vip/${matchId}?error=save_failed`)
   }
+
+  await sendMail({
+    to: email,
+    subject: 'Potvrzení VIP registrace',
+    html: `
+      <p>Vážený pane / paní ${name},</p>
+  
+      <p>potvrzujeme vám registraci na utkání 
+      <strong>${match.home} - ${match.away}</strong>.</p>
+  
+      <p>Počet VIP vstupenek: <strong>${ticketsCount}</strong></p>
+  
+      <p>VIP vstupenky vám budou zaslány v den zápasu.</p>
+  
+      <br/>
+  
+      <p>S pozdravem<br/>
+      <strong>Lovci Lovosice</strong></p>
+  
+      <p style="font-size:14px;color:#555;">
+      V případě nejasností se obracejte na 
+      <a href="mailto:lucie@hazenalovosice.cz">lucie@hazenalovosice.cz</a>
+      </p>
+    `,
+  })
 
   redirect(`/vip/${matchId}/ok`)
 }
