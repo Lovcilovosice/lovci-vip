@@ -85,11 +85,13 @@ export default async function VipMatchesPage() {
           </div>
 
           <div className="flex items-center justify-center">
-            <img
-              src="/logo.png"
-              alt="Lovci Lovosice"
-              className="h-20 w-20 object-contain"
-            />
+            <Link href="/admin/exporty" aria-label="Admin exporty">
+              <img
+                src="/logo.png"
+                alt="Lovci Lovosice"
+                className="h-20 w-20 object-contain"
+              />
+            </Link>
           </div>
         </header>
 
