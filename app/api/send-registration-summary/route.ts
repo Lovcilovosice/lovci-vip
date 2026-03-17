@@ -31,6 +31,21 @@ function requireEnv(name: string): string {
   return value;
 }
 
+function isAuthorized(req: Request): boolean {
+  const authHeader = req.headers.get('authorization');
+  const cronSecret = process.env.CRON_SECRET;
+
+  if (!cronSecret) {
+    throw new Error('Missing env: CRON_SECRET');
+  }
+
+  if (!authHeader) {
+    return false;
+  }
+
+  return authHeader === `Bearer ${cronSecret}`;
+}
+
 function parseDbLocalDate(value: string | null): Date | null {
   if (!value) return null;
 
@@ -146,8 +161,15 @@ async function sendMail(match: MatchRow, registrations: RegistrationRow[]) {
   });
 }
 
-export async function GET(_req: Request) {
+export async function GET(req: Request) {
   try {
+    if (!isAuthorized(req)) {
+      return NextResponse.json(
+        { ok: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const supabase = createClient(
       requireEnv('NEXT_PUBLIC_SUPABASE_URL'),
       requireEnv('SUPABASE_SERVICE_ROLE_KEY')
@@ -196,8 +218,7 @@ export async function GET(_req: Request) {
       processed: eligible.length,
     });
   } catch (e: unknown) {
-    const message =
-      e instanceof Error ? e.message : 'Unknown error';
+    const message = e instanceof Error ? e.message : 'Unknown error';
 
     return NextResponse.json(
       {
