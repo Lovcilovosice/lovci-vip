@@ -4,7 +4,9 @@ import { sendMail } from '@/lib/mail'
 
 export async function GET() {
   try {
-    const now = new Date().toISOString()
+    const now = new Date(
+      new Date().toLocaleString('en-US', { timeZone: 'Europe/Prague' })
+    ).toISOString()
 
     const { data: matches, error: matchesError } = await supabase
       .from('matches')
