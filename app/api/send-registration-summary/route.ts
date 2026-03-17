@@ -147,7 +147,7 @@ async function sendMail(match: MatchRow, registrations: RegistrationRow[]) {
 
   await transporter.sendMail({
     from: `"Lovci Lovosice VIP" <${requireEnv('SMTP_FROM')}>`,
-    to: requireEnv('INTERNAL_SUMMARY_EMAIL'),
+    to: requireEnv('INTERNAL_SUMMARY_EMAIL').split(','),
     subject: `Souhrn VIP registrací: ${formatMatchName(match)}`,
     text: 'Souhrn registrací je v příloze (Excel).',
     attachments: [
