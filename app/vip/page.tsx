@@ -1,6 +1,23 @@
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 
+function toPragueComparableDate(value: string) {
+  return new Date(
+    new Date(value).toLocaleString('en-US', { timeZone: 'Europe/Prague' })
+  )
+}
+
+function formatPragueDate(value: string) {
+  return new Date(value).toLocaleString('cs-CZ', {
+    timeZone: 'Europe/Prague',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
 export default async function VipMatchesPage() {
   const { data: matches, error } = await supabase
     .from('matches')
@@ -19,10 +36,12 @@ export default async function VipMatchesPage() {
     )
   }
 
-  const now = new Date()
+  const now = new Date(
+    new Date().toLocaleString('en-US', { timeZone: 'Europe/Prague' })
+  )
 
   const futureMatches =
-    matches?.filter((match) => new Date(match.match_date) >= now) ?? []
+    matches?.filter((match) => toPragueComparableDate(match.match_date) >= now) ?? []
 
   return (
     <main className="min-h-screen bg-[#1b1e32] text-[#bad2ed]">
@@ -59,32 +78,12 @@ export default async function VipMatchesPage() {
           <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {futureMatches.map((match) => {
               const registrationOpen =
-                new Date(match.registration_from) <= now &&
-                new Date(match.registration_to) >= now
+                toPragueComparableDate(match.registration_from) <= now &&
+                toPragueComparableDate(match.registration_to) >= now
 
-              const matchDate = new Date(match.match_date).toLocaleString('cs-CZ', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-              })
-
-              const registrationFrom = new Date(match.registration_from).toLocaleString('cs-CZ', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-              })
-
-              const registrationTo = new Date(match.registration_to).toLocaleString('cs-CZ', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-              })
+              const matchDate = formatPragueDate(match.match_date)
+              const registrationFrom = formatPragueDate(match.registration_from)
+              const registrationTo = formatPragueDate(match.registration_to)
 
               return (
                 <article
