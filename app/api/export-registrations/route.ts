@@ -31,7 +31,7 @@ function requireEnv(name: string): string {
 function isAuthorized(req: Request): boolean {
   const url = new URL(req.url);
   const secret = url.searchParams.get('secret');
-  return secret === requireEnv('ADMIN_EXPORT_SECRET');
+  return secret === requireEnv('ADMIN_PIN');
 }
 
 function sanitizeFileName(value: string): string {
