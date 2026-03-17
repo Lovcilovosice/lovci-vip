@@ -3,21 +3,25 @@ export const dynamic = 'force-dynamic'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 
-function toPragueComparableDate(value: string) {
-  return new Date(
-    new Date(value).toLocaleString('en-US', { timeZone: 'Europe/Prague' })
-  )
+function parseDbLocalDate(value: string) {
+  const normalized = value.replace('T', ' ').replace('Z', '')
+  const [datePart, timePart = '00:00:00'] = normalized.split(' ')
+  const [year, month, day] = datePart.split('-').map(Number)
+  const [hour, minute, second] = timePart.split(':').map(Number)
+
+  return new Date(year, month - 1, day, hour, minute, second || 0)
 }
 
-function formatPragueDate(value: string) {
-  return new Date(value).toLocaleString('cs-CZ', {
-    timeZone: 'Europe/Prague',
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+function formatDbLocalDate(value: string) {
+  const date = parseDbLocalDate(value)
+
+  const day = String(date.getDate()).padStart(2, '0')
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const year = date.getFullYear()
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+
+  return `${day}. ${month}. ${year} ${hours}:${minutes}`
 }
 
 export default async function VipMatchesPage() {
@@ -38,12 +42,10 @@ export default async function VipMatchesPage() {
     )
   }
 
-  const now = new Date(
-    new Date().toLocaleString('en-US', { timeZone: 'Europe/Prague' })
-  )
+  const now = new Date()
 
   const futureMatches =
-    matches?.filter((match) => toPragueComparableDate(match.match_date) >= now) ?? []
+    matches?.filter((match) => parseDbLocalDate(match.match_date) >= now) ?? []
 
   return (
     <main className="min-h-screen bg-[#1b1e32] text-[#bad2ed]">
@@ -80,12 +82,12 @@ export default async function VipMatchesPage() {
           <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {futureMatches.map((match) => {
               const registrationOpen =
-                toPragueComparableDate(match.registration_from) <= now &&
-                toPragueComparableDate(match.registration_to) >= now
+                parseDbLocalDate(match.registration_from) <= now &&
+                parseDbLocalDate(match.registration_to) >= now
 
-              const matchDate = formatPragueDate(match.match_date)
-              const registrationFrom = formatPragueDate(match.registration_from)
-              const registrationTo = formatPragueDate(match.registration_to)
+              const matchDate = formatDbLocalDate(match.match_date)
+              const registrationFrom = formatDbLocalDate(match.registration_from)
+              const registrationTo = formatDbLocalDate(match.registration_to)
 
               return (
                 <article
