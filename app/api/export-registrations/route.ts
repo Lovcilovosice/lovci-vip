@@ -153,7 +153,7 @@ export async function GET(req: Request) {
       `vip-registrace-${match.id}-${match.home ?? 'domaci'}-vs-${match.away ?? 'hoste'}`
     );
 
-    return new Response(excelBuffer, {
+    return new Response(new Uint8Array(excelBuffer), {
       status: 200,
       headers: {
         'Content-Type':
