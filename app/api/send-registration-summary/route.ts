@@ -6,9 +6,28 @@ import * as XLSX from 'xlsx';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+type MatchRow = {
+  id: number;
+  home: string | null;
+  away: string | null;
+  registration_to: string | null;
+  registration_summary_sent_at: string | null;
+};
+
+type RegistrationRow = {
+  id: number;
+  match_id: number;
+  name: string | null;
+  email: string | null;
+  tickets_count: number | null;
+  note: string | null;
+};
+
 function requireEnv(name: string): string {
   const value = process.env[name];
-  if (!value) throw new Error(`Missing env: ${name}`);
+  if (!value) {
+    throw new Error(`Missing env: ${name}`);
+  }
   return value;
 }
 
@@ -37,7 +56,8 @@ function parseDbLocalDate(value: string | null): Date | null {
 
 function getNowPrague(): Date {
   const now = new Date();
-  const f = new Intl.DateTimeFormat('en-CA', {
+
+  const formatter = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Europe/Prague',
     year: 'numeric',
     month: '2-digit',
@@ -48,8 +68,8 @@ function getNowPrague(): Date {
     hourCycle: 'h23',
   });
 
-  const parts = f.formatToParts(now);
-  const get = (t: string) => parts.find(p => p.type === t)?.value ?? '00';
+  const parts = formatter.formatToParts(now);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? '00';
 
   return new Date(
     Number(get('year')),
@@ -70,14 +90,15 @@ function getNowDb(): string {
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
+    hourCycle: 'h23',
   }).format(new Date());
 }
 
-function formatMatchName(match: any): string {
+function formatMatchName(match: MatchRow): string {
   return `${match.home ?? ''} vs ${match.away ?? ''}`.trim();
 }
 
-function buildExcel(registrations: any[]): Buffer {
+function buildExcel(registrations: RegistrationRow[]): Buffer {
   const data = registrations.map((r, i) => ({
     '#': i + 1,
     Jméno: r.name ?? '',
@@ -90,10 +111,13 @@ function buildExcel(registrations: any[]): Buffer {
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Registrace');
 
-  return XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+  return XLSX.write(wb, {
+    type: 'buffer',
+    bookType: 'xlsx',
+  }) as Buffer;
 }
 
-async function sendMail(match: any, registrations: any[]) {
+async function sendMail(match: MatchRow, registrations: RegistrationRow[]) {
   const transporter = nodemailer.createTransport({
     host: requireEnv('SMTP_HOST'),
     port: Number(requireEnv('SMTP_PORT')),
@@ -122,7 +146,7 @@ async function sendMail(match: any, registrations: any[]) {
   });
 }
 
-export async function GET(req: Request) {
+export async function GET(_req: Request) {
   try {
     const supabase = createClient(
       requireEnv('NEXT_PUBLIC_SUPABASE_URL'),
@@ -131,32 +155,56 @@ export async function GET(req: Request) {
 
     const now = getNowPrague();
 
-    const { data: matches } = await supabase
+    const { data: matches, error: matchesError } = await supabase
       .from('matches')
       .select('*')
       .is('registration_summary_sent_at', null);
 
-    const eligible = (matches || []).filter((m: any) => {
-      const to = parseDbLocalDate(m.registration_to);
-      return to && to <= now;
+    if (matchesError) {
+      throw matchesError;
+    }
+
+    const eligible = ((matches ?? []) as MatchRow[]).filter((match) => {
+      const registrationTo = parseDbLocalDate(match.registration_to);
+      return registrationTo !== null && registrationTo <= now;
     });
 
     for (const match of eligible) {
-      const { data: registrations } = await supabase
+      const { data: registrations, error: registrationsError } = await supabase
         .from('registrations')
         .select('*')
         .eq('match_id', match.id);
 
-      await sendMail(match, registrations || []);
+      if (registrationsError) {
+        throw registrationsError;
+      }
 
-      await supabase
+      await sendMail(match, (registrations ?? []) as RegistrationRow[]);
+
+      const { error: updateError } = await supabase
         .from('matches')
         .update({ registration_summary_sent_at: getNowDb() })
         .eq('id', match.id);
+
+      if (updateError) {
+        throw updateError;
+      }
     }
 
-    return NextResponse.json({ ok: true, processed: eligible.length });
-  } catch (e: any) {
-    return NextResponse.json({ ok: false, error: e.message });
+    return NextResponse.json({
+      ok: true,
+      processed: eligible.length,
+    });
+  } catch (e: unknown) {
+    const message =
+      e instanceof Error ? e.message : 'Unknown error';
+
+    return NextResponse.json(
+      {
+        ok: false,
+        error: message,
+      },
+      { status: 500 }
+    );
   }
 }
