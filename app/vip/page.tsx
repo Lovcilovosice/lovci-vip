@@ -24,6 +24,25 @@ function formatDbLocalDate(value: string) {
   return `${day}. ${month}. ${year} ${hours}:${minutes}`
 }
 
+function getPragueNowAsLocalDate() {
+  const pragueNowString = new Intl.DateTimeFormat('sv-SE', {
+    timeZone: 'Europe/Prague',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  }).format(new Date())
+
+  const [datePart, timePart] = pragueNowString.split(' ')
+  const [year, month, day] = datePart.split('-').map(Number)
+  const [hour, minute, second] = timePart.split(':').map(Number)
+
+  return new Date(year, month - 1, day, hour, minute, second)
+}
+
 export default async function VipMatchesPage() {
   const { data: matches, error } = await supabase
     .from('matches')
@@ -42,7 +61,7 @@ export default async function VipMatchesPage() {
     )
   }
 
-  const now = new Date()
+  const now = getPragueNowAsLocalDate()
 
   const futureMatches =
     matches?.filter((match) => parseDbLocalDate(match.match_date) >= now) ?? []
