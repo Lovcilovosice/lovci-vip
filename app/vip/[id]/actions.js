@@ -64,30 +64,38 @@ export async function saveVipRegistration(formData) {
     redirect(`/vip/${matchId}?error=save_failed`)
   }
 
-  await sendMail({
-    to: email,
-    subject: 'Potvrzení VIP registrace',
-    html: `
-      <p>Vážený pane / paní ${name},</p>
-  
-      <p>potvrzujeme vám registraci na utkání 
-      <strong>${match.home} - ${match.away}</strong>.</p>
-  
-      <p>Počet VIP vstupenek: <strong>${ticketsCount}</strong></p>
-  
-      <p>VIP vstupenky vám budou zaslány v den zápasu.</p>
-  
-      <br/>
-  
-      <p>S pozdravem<br/>
-      <strong>Lovci Lovosice</strong></p>
-  
-      <p style="font-size:14px;color:#555;">
-      V případě nejasností se obracejte na 
-      <a href="mailto:lucie@hazenalovosice.cz">lucie@hazenalovosice.cz</a>
-      </p>
-    `,
-  })
+  try {
+    await sendMail({
+      to: email,
+      subject: 'Potvrzení VIP registrace',
+      html: `
+        <p>Vážený pane / paní ${name},</p>
+    
+        <p>potvrzujeme vám registraci na utkání 
+        <strong>${match.home} - ${match.away}</strong>.</p>
+    
+        <p>Počet VIP vstupenek: <strong>${ticketsCount}</strong></p>
+    
+        <p>VIP vstupenky vám budou zaslány v den zápasu.</p>
+    
+        <br/>
+    
+        <p>S pozdravem<br/>
+        <strong>Lovci Lovosice</strong></p>
+    
+        <p style="font-size:14px;color:#555;">
+        V případě nejasností se obracejte na 
+        <a href="mailto:lucie@hazenalovosice.cz">lucie@hazenalovosice.cz</a>
+        </p>
+      `,
+    })
+  } catch (mailError) {
+    console.error('Failed to send VIP registration confirmation email', {
+      matchId,
+      email,
+      error: mailError,
+    })
+  }
 
   redirect(`/vip/${matchId}/ok`)
 }
