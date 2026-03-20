@@ -30,6 +30,31 @@ export async function GET() {
     }
 
     const match = matches[0]
+    const claimedAt = new Date().toISOString()
+
+    const { data: claimedMatch, error: claimError } = await supabase
+      .from('matches')
+      .update({ registration_email_sent_at: claimedAt })
+      .eq('id', match.id)
+      .is('registration_email_sent_at', null)
+      .select(
+        'id, home, away, match_date, registration_from, registration_to, registration_email_sent_at'
+      )
+      .maybeSingle()
+
+    if (claimError) {
+      return NextResponse.json(
+        { ok: false, error: claimError.message },
+        { status: 500 }
+      )
+    }
+
+    if (!claimedMatch) {
+      return NextResponse.json({
+        ok: true,
+        message: 'Oznámení už mezitím zpracoval jiný běh cronu.',
+      })
+    }
 
     const { data: invitedEmails, error: invitedError } = await supabase
       .from('vip_invited_emails')
@@ -49,7 +74,7 @@ export async function GET() {
       )
     }
 
-    const matchDate = new Date(match.match_date).toLocaleString('cs-CZ', {
+    const matchDate = new Date(claimedMatch.match_date).toLocaleString('cs-CZ', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -57,7 +82,7 @@ export async function GET() {
       minute: '2-digit',
     })
 
-    const registrationTo = new Date(match.registration_to).toLocaleString('cs-CZ', {
+    const registrationTo = new Date(claimedMatch.registration_to).toLocaleString('cs-CZ', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -76,7 +101,7 @@ export async function GET() {
 
           <p>
             právě byla zahájena registrace do VIP prostor na utkání
-            <strong>${match.home} - ${match.away}</strong>.
+            <strong>${claimedMatch.home} - ${claimedMatch.away}</strong>.
           </p>
 
           <p>Termín utkání: <strong>${matchDate}</strong></p>
@@ -102,22 +127,10 @@ export async function GET() {
       })
     }
 
-    const { error: updateError } = await supabase
-      .from('matches')
-      .update({ registration_email_sent_at: new Date().toISOString() })
-      .eq('id', match.id)
-
-    if (updateError) {
-      return NextResponse.json(
-        { ok: false, error: updateError.message },
-        { status: 500 }
-      )
-    }
-
     return NextResponse.json({
       ok: true,
       sent: invitedEmails.length,
-      matchId: match.id,
+      matchId: claimedMatch.id,
     })
   } catch (error) {
     return NextResponse.json(
