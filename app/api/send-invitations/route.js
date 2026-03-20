@@ -134,7 +134,7 @@ export async function GET(request) {
         to: row.email,
         subject: 'Zahájení VIP registrace',
         html: `
-          <p>Vážení,</p>
+          <p>Vážení partneři,</p>
 
           <p>
             právě byla zahájena registrace do VIP prostor na utkání
