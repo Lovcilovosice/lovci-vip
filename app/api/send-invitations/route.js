@@ -1,9 +1,46 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 import { sendMail } from '@/lib/mail'
 
-export async function GET() {
+function requireEnv(name) {
+  const value = process.env[name]
+
+  if (!value) {
+    throw new Error(`Missing env: ${name}`)
+  }
+
+  return value
+}
+
+function isAuthorized(req) {
+  const authHeader = req.headers.get('authorization')
+  const cronSecret = process.env.CRON_SECRET
+
+  if (!cronSecret) {
+    throw new Error('Missing env: CRON_SECRET')
+  }
+
+  if (!authHeader) {
+    return false
+  }
+
+  return authHeader === `Bearer ${cronSecret}`
+}
+
+export async function GET(request) {
   try {
+    if (!isAuthorized(request)) {
+      return NextResponse.json(
+        { ok: false, error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    const supabase = createClient(
+      requireEnv('NEXT_PUBLIC_SUPABASE_URL'),
+      requireEnv('SUPABASE_SERVICE_ROLE_KEY')
+    )
+
     const now = new Date(
       new Date().toLocaleString('en-US', { timeZone: 'Europe/Prague' })
     ).toISOString()
