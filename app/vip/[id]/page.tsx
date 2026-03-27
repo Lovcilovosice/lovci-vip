@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { supabase } from '../../../lib/supabase'
 import { saveVipRegistration } from './actions'
+import { EmailInput } from './EmailInput'
 
 export default async function Page({
   params,
@@ -107,10 +108,7 @@ export default async function Page({
 
           <div>
             <label className="mb-2 block text-sm text-[#bad2ed]/80">E-mail</label>
-            <input
-              name="email"
-              type="email"
-              required
+            <EmailInput
               className="w-full rounded-2xl border border-white/15 bg-black/10 px-4 py-3 text-base text-[#bad2ed] outline-none focus:border-[#bad2ed]"
             />
           </div>

@@ -4,11 +4,14 @@ import { redirect } from 'next/navigation'
 import { supabase } from '../../../lib/supabase'
 import { sendMail } from '@/lib/mail'
 
+function normalizeEmail(value) {
+  return value?.toString().trim().toLowerCase().replace(/\s+/g, '') || ''
+}
+
 export async function saveVipRegistration(formData) {
   const matchId = Number(formData.get('match_id'))
   const name = formData.get('name')?.toString().trim() || ''
-  const email =
-    formData.get('email')?.toString().trim().toLowerCase().replace(/\s+/g, '') || ''
+  const email = normalizeEmail(formData.get('email'))
   const ticketsCount = Number(formData.get('tickets_count'))
   const note = formData.get('note')?.toString().trim() || ''
 
@@ -23,7 +26,8 @@ export async function saveVipRegistration(formData) {
   const { data: invitedEmail, error: invitedEmailError } = await supabase
     .from('vip_invited_emails')
     .select('id, email')
-    .eq('email', email)
+    .ilike('email', email)
+    .limit(1)
     .maybeSingle()
 
   if (invitedEmailError) {
@@ -42,6 +46,22 @@ export async function saveVipRegistration(formData) {
 
   if (matchError || !match) {
     redirect(`/vip/${matchId}?error=match_not_found`)
+  }
+
+  const { data: existingRegistration, error: existingRegistrationError } = await supabase
+    .from('registrations')
+    .select('id')
+    .eq('match_id', matchId)
+    .ilike('email', email)
+    .limit(1)
+    .maybeSingle()
+
+  if (existingRegistrationError) {
+    redirect(`/vip/${matchId}?error=save_failed`)
+  }
+
+  if (existingRegistration) {
+    redirect(`/vip/${matchId}?error=already_registered`)
   }
 
   const { error: insertError } = await supabase
